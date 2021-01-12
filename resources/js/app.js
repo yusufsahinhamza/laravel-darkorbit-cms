@@ -7,6 +7,7 @@
 require('./bootstrap');
 
 import vuetify from './plugins/vuetify'
+import router from './plugins/vue-router';
 
 import App from './App.vue';
 
@@ -20,5 +21,6 @@ window.Vue = require('vue').default;
 
 const app = new Vue({
     vuetify,
+    router,
     render: h => h(App)
 }).$mount('#app');

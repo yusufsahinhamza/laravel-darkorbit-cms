@@ -1,0 +1,17 @@
+<template>
+    <v-container>
+        <v-row 
+            align="center"
+            justify="center"
+        >
+            <v-col>
+                <v-sheet
+                    min-height="70vh"
+                    rounded="lg"
+                >
+                Index
+                </v-sheet>
+            </v-col>
+        </v-row>
+    </v-container>
+</template>
