@@ -8,10 +8,19 @@ require('./bootstrap');
 
 import vuetify from './plugins/vuetify'
 import router from './plugins/vue-router';
+import store from './plugins/vuex';
 
 import App from './App.vue';
 
+import VSnackbars from 'v-snackbars';
+
 window.Vue = require('vue').default;
+
+Vue.mixin({
+    components: {
+        VSnackbars
+    }
+});
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -19,8 +28,13 @@ window.Vue = require('vue').default;
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-const app = new Vue({
-    vuetify,
-    router,
-    render: h => h(App)
-}).$mount('#app');
+Promise.all([
+    store.dispatch('checkAuth')
+]).finally(() => {
+    new Vue({
+        vuetify,
+        router,
+        store,
+        render: h => h(App)
+    }).$mount('#app');
+});

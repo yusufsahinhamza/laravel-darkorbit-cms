@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::post('/auth/check', 'App\Http\Controllers\AuthController@check');
+Route::post('/auth/register', 'App\Http\Controllers\AuthController@register');
+Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
+Route::post('/auth/get-user', 'App\Http\Controllers\AuthController@getUser');
+
 Route::get('/{any}', function () {
     return view('index');
 })->where('any', '.*')->name('index');
