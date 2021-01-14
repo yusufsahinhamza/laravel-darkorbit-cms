@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('username')->unique();
             $table->string('email')->unique();
             $table->string('password');
+            $table->integer('faction_id')->default(0);
             $table->bigInteger('created_at');
             $table->bigInteger('updated_at')->nullable();
         });

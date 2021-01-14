@@ -31,19 +31,21 @@ const store = new Vuex.Store({
                     
                     resolve(response);
                 }).catch(error => {
-                    console.log(error.response.data);
-                    
                     reject(error);
                 });
             });
         },
         loadUser({ commit }) {
-            return axios.post('/auth/get-user').then(response => {
-                if (response.data.status === true) {
-                    commit('updateUser', response.data.data);
-                }
-            }).catch(error => {
-                console.log(error.response.data);
+            return new Promise((resolve, reject) => {
+                axios.post('/auth/get-user').then(async response => { 
+                    if (response.data.status === true) {
+                        commit('updateUser', response.data.data);
+                    }
+                    
+                    resolve(response);
+                }).catch(error => {
+                    reject(error);
+                });
             });
         }
     }

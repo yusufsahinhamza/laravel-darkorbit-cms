@@ -15,8 +15,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/check', 'App\Http\Controllers\AuthController@check');
 Route::post('/auth/register', 'App\Http\Controllers\AuthController@register');
+Route::post('/auth/login', 'App\Http\Controllers\AuthController@login');
 Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
 Route::post('/auth/get-user', 'App\Http\Controllers\AuthController@getUser');
+
+Route::post('/user/select-company', 'App\Http\Controllers\UserController@selectCompany');
 
 Route::get('/{any}', function () {
     return view('index');

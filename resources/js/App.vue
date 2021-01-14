@@ -1,7 +1,7 @@
 <template>
     <v-app id="inspire">
         <Header :snackbars="snackbars"/>
-        <v-main class="grey lighten-3">
+        <v-main class="grey lighten-3 mt-2">
             <transition
                 name="fade"
                 mode="out-in"

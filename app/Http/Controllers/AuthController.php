@@ -8,9 +8,9 @@ class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('unauthenticated')->only(['register']);
+        $this->middleware('unauthenticated')->only(['login', 'register']);
 
-        $this->middleware('authenticated')->only(['logout']);
+        $this->middleware('authenticated')->only(['logout', 'getUser']);
     }
 
     public function check()
@@ -25,7 +25,7 @@ class AuthController extends Controller
         }
 
         if (!is_string($request->username) || !preg_match('/^[A-Za-z0-9]{4,20}$/', $request->username)) {
-            return response(['status' => 'error', 'code' => 231, 'message' => '"username" parameter is invalid.']);
+            return response(['status' => false, 'message' => '"username" parameter is invalid.']);
         }
 
         if (!$request->exists('email')) {
@@ -40,36 +40,78 @@ class AuthController extends Controller
             return response(['status' => false, 'message' => '"password" parameter does not exists.']);
         }
 
-        $sanitized = (object)\Sanitizer::make($request->all(), 
+        $sanitized = (object)\Sanitizer::make($request->all(),
         [
             'username' => ['trim', 'strip_tags', 'escape'],
-            'email'  => ['trim', 'strip_tags', 'escape', 'lowercase']
+            'email'  => ['trim', 'strip_tags', 'escape', 'lowercase'],
+            'password' => ['trim']
         ])->sanitize();
 
-        \DB::transaction(function() use($sanitized, $request) {
+        \DB::transaction(function() use($sanitized) {
             $user = \DB::table('users')->where([['email', '=', $sanitized->email]])->orWhere([['username', '=', $sanitized->username]])->first();
 
             if ($user !== null) {
-                exit(json_encode(['status' => false, 'message' => 'An user is already exists by this username or email address.']));
+                exit(json_encode(['status' => false, 'message' => 'A user is already exists by this username or email address.']));
             }
 
             $insert = [
                 'username' => $sanitized->username,
                 'email' => $sanitized->email,
-                'password' => \Hash::make($request->password),
+                'password' => \Hash::make($sanitized->password),
                 'created_at' => Controller::getTimestamp()
             ];
 
-            $user_id = \DB::table('users')->insertGetId($insert);
+            \DB::table('users')->insert($insert);
 
-            if (!\Auth::loginUsingId($user_id)) {
+            if (!\Auth::attempt(['username' => $sanitized->username, 'password' => $sanitized->password])) {
                 exit(json_encode(['status' => false, 'message' => 'An error occurred while logging in.']));
             }
-            
+
             session()->regenerate();
         }, 5);
 
-        return response(['status' => true]); 
+        return response(['status' => true]);
+    }
+
+    public function login(Request $request)
+    {
+        if (!$request->exists('username')) {
+            return response(['status' => false, 'message' => '"username" parameter does not exists.']);
+        }
+
+        if (!is_string($request->username) || !preg_match('/^[A-Za-z0-9]{4,20}$/', $request->username)) {
+            return response(['status' => false, 'message' => '"username" parameter is invalid.']);
+        }
+
+        if (!$request->exists('password')) {
+            return response(['status' => false, 'message' => '"password" parameter does not exists.']);
+        }
+
+        $sanitized = (object)\Sanitizer::make($request->all(),
+        [
+            'username' => ['trim', 'strip_tags', 'escape'],
+            'password' => ['trim']
+        ])->sanitize();
+
+        \DB::transaction(function() use($sanitized) {
+            $user = \DB::table('users')->where([['username', '=', $sanitized->username]])->first();
+
+            if ($user === null) {
+                exit(json_encode(['status' => false, 'message' => 'A user with this username does not exists.']));
+            }
+
+            if (!\Hash::check($sanitized->password, $user->password)) {
+                exit(json_encode(['status' => false, 'message' => 'This password doesnt match.']));
+            }
+
+            if (!\Auth::attempt(['username' => $user->username, 'password' => $sanitized->password])) {
+                exit(json_encode(['status' => false, 'message' => 'An error occurred while logging in.']));
+            }
+    
+            session()->regenerate();
+        }, 5);
+
+        return response(['status' => true]);
     }
 
     public function logout(Request $request)
@@ -85,6 +127,17 @@ class AuthController extends Controller
 
     public function getUser()
     {
-        return response(['status' => true, 'data' => ['name' => 'test']]);
+        $user = null;
+
+        $get_user = \DB::table('users')->where([['id', '=', \Auth::id()]])->first();
+
+        if ($get_user === null) {
+            return response(['status' => false, 'message' => 'Current user not found.']);
+        }
+
+        $user['u'] = $get_user->username;
+        $user['f'] = Controller::getCompanyNameById($get_user->faction_id);
+
+        return response(['status' => true, 'data' => $user]);
     }
 }

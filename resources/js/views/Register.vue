@@ -96,14 +96,14 @@
                 }).then(response => {
                     if (response.data.status === true) {
                         this.loadUser();
-                        this.$router.push({ name: 'Index' });
+                        this.$router.push({ name: 'SelectCompany' });
                     } else {
                         if (response.data.message) {
                             this.snackbars.push({ color: 'red', header: 'Error', message: response.data.message });
                         }
                     }
                 }).catch(error => {
-                    this.snackbars.push({ color: 'red', header: 'Error', message: 'An error occurred while submitting the register form.' });
+                    this.snackbars.push({ color: 'red', header: 'Error', message: 'An error occurred while submitting the form.' });
                 }).finally(() => {
                     this.form.submitButtonLoading = false;
                 });

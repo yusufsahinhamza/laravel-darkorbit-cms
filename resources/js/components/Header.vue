@@ -1,16 +1,9 @@
 <template>
     <v-app-bar
-      app
-      color="white"
-      flat
+        app
+        color="white"
     >
         <v-container class="py-0 fill-height">
-            <v-avatar
-                class="mr-10"
-                color="grey darken-1"
-                size="32"
-            ></v-avatar>
-
             <v-btn
                 text
                 exact
@@ -43,8 +36,8 @@
                         </v-btn>
                     </template>
                     <v-list>
-                        <v-list-item router :to="{ name: 'Index' }">
-                            <v-list-item-title>{{ user.name }}</v-list-item-title>
+                        <v-list-item router :to="{ name: 'User' }">
+                            <v-list-item-title>{{ user.u }}</v-list-item-title>
                         </v-list-item>
                         <v-divider></v-divider>
                         <v-list-item
