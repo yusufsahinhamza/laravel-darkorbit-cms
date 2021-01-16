@@ -36,8 +36,8 @@
                         </v-btn>
                     </template>
                     <v-list>
-                        <v-list-item router :to="{ name: 'User' }">
-                            <v-list-item-title>{{ user.u }}</v-list-item-title>
+                        <v-list-item :to="{ name: 'Settings' }">
+                            <v-list-item-title>Settings</v-list-item-title>
                         </v-list-item>
                         <v-divider></v-divider>
                         <v-list-item

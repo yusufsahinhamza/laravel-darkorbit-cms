@@ -9,6 +9,7 @@
                     <v-form
                         ref="form"
                         class="pa-6"
+                        v-on:submit.prevent="submitForm()"
                     >
                         <v-text-field
                             label="Username"
@@ -39,9 +40,9 @@
                             block
                             large
                             color="primary"
+                            type="submit"
                             :disabled="form.submitButtonLoading"
                             :loading="form.submitButtonLoading"
-                            @click="submitForm()"
                         >
                         Register
                         </v-btn>
@@ -53,7 +54,7 @@
 </template>
 
 <script>
-    import { mapActions } from 'vuex';
+    import { mapActions, mapState } from 'vuex';
 
     export default {
         props: [
@@ -69,6 +70,9 @@
             }
         }),
         computed: {
+            ...mapState([
+                'user'
+            ]),
             globalRules() {
                 const rules = {
                     required: v => !!v || 'This field is required',
@@ -95,8 +99,9 @@
                     password: this.form.password
                 }).then(response => {
                     if (response.data.status === true) {
-                        this.loadUser();
-                        this.$router.push({ name: 'SelectCompany' });
+                        this.loadUser().then(() => {
+                            this.$router.push({ name: this.user.f === 'NONE' ? 'SelectCompany' : 'Index' });
+                        });
                     } else {
                         if (response.data.message) {
                             this.snackbars.push({ color: 'red', header: 'Error', message: response.data.message });

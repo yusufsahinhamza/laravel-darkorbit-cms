@@ -9,6 +9,7 @@
                     <v-form
                         ref="form"
                         class="pa-6"
+                        v-on:submit.prevent="submitForm()"
                     >
                         <v-text-field
                             label="Username"
@@ -31,9 +32,9 @@
                             block
                             large
                             color="primary"
+                            type="submit"
                             :disabled="form.submitButtonLoading"
                             :loading="form.submitButtonLoading"
-                            @click="submitForm()"
                         >
                         Login
                         </v-btn>

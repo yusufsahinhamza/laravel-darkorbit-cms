@@ -8,7 +8,64 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('authenticated')->only(['selectCompany']);
+        $this->middleware('authenticated')->only(['selectCompany', 'changePilotName', 'changePassword']);
+    }
+
+    public function changePilotName(Request $request)
+    {
+        if (!$request->exists('pilotName')) {
+            return response(['status' => false, 'message' => '"pilotName" parameter does not exists.']);
+        }
+
+        $sanitized = (object)\Sanitizer::make($request->all(),
+        [
+            'pilotName' => ['trim']
+        ])->sanitize();
+
+        \DB::transaction(function() use($sanitized) {
+            $user = \DB::table('users')->where([['pilot_name', '=', $sanitized->pilotName]])->first();
+
+            if ($user !== null) {
+                exit(json_encode(['status' => false, 'message' => 'A user is already exists with this pilot name.']));
+            }
+
+            \DB::table('users')->where([['id', '=', \Auth::id()]])->update([
+                'pilot_name' => $sanitized->pilotName
+            ]);
+        }, 5);
+
+        return response(['status' => true]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        if (!$request->exists('oldPassword')) {
+            return response(['status' => false, 'message' => '"oldPassword" parameter does not exists.']);
+        }
+
+        if (!$request->exists('newPassword')) {
+            return response(['status' => false, 'message' => '"newPassword" parameter does not exists.']);
+        }
+
+        $sanitized = (object)\Sanitizer::make($request->all(),
+        [
+            'oldPassword' => ['trim'],
+            'newPassword' => ['trim']
+        ])->sanitize();
+
+        \DB::transaction(function() use($sanitized) {
+            $user = \DB::table('users')->where([['id', '=', \Auth::id()]])->first();
+
+            if (!\Hash::check($sanitized->oldPassword, $user->password)) {
+                exit(json_encode(['status' => false, 'message' => 'Old password doesnt match.']));
+            }
+
+            \DB::table('users')->where([['id', '=', \Auth::id()]])->update([
+                'password' => \Hash::make($sanitized->newPassword)
+            ]);
+        }, 5);
+
+        return response(['status' => true]);
     }
 
     public function selectCompany(Request $request)
@@ -31,12 +88,8 @@ class UserController extends Controller
 
             $user = \DB::table('users')->where([['id', '=', $user_id]])->lockForUpdate()->first();
 
-            if ($user === null) {
-                exit(json_encode(['status' => false, 'message' => 'Current user not found.']));
-            }
-
             if ($user->faction_id !== 0) {
-                exit(json_encode(['status' => false, 'message' => 'This user already registered to a company.']));
+                exit(json_encode(['status' => false, 'message' => 'You are already registered to a company.']));
             }
 
             \DB::table('users')->where([['id', '=', $user_id]])->update([

@@ -51,11 +51,18 @@ class AuthController extends Controller
             $user = \DB::table('users')->where([['email', '=', $sanitized->email]])->orWhere([['username', '=', $sanitized->username]])->first();
 
             if ($user !== null) {
-                exit(json_encode(['status' => false, 'message' => 'A user is already exists by this username or email address.']));
+                exit(json_encode(['status' => false, 'message' => 'A user is already exists with this username or email address.']));
+            }
+
+            $pilot_name = $sanitized->username;
+
+            if (\DB::table('users')->where([['pilot_name', '=', $pilot_name]])->first() !== null) {
+                $pilot_name = $this->getUniquePilotName($pilot_name);
             }
 
             $insert = [
                 'username' => $sanitized->username,
+                'pilot_name' => $pilot_name,
                 'email' => $sanitized->email,
                 'password' => \Hash::make($sanitized->password),
                 'created_at' => Controller::getTimestamp()
@@ -71,6 +78,17 @@ class AuthController extends Controller
         }, 5);
 
         return response(['status' => true]);
+    }
+
+    public function getUniquePilotName($pilot_name)
+    {
+        $new_pilot_name = $pilot_name . rand(100000, 999999);
+
+        if (\DB::table('users')->where([['pilot_name', '=', $new_pilot_name]])->first() !== null) {
+            $new_pilot_name = $this->getUniquePilotName($pilot_name);
+        }
+
+        return $new_pilot_name;
     }
 
     public function login(Request $request)
@@ -131,11 +149,8 @@ class AuthController extends Controller
 
         $get_user = \DB::table('users')->where([['id', '=', \Auth::id()]])->first();
 
-        if ($get_user === null) {
-            return response(['status' => false, 'message' => 'Current user not found.']);
-        }
-
         $user['u'] = $get_user->username;
+        $user['pn'] = $get_user->pilot_name;
         $user['f'] = Controller::getCompanyNameById($get_user->faction_id);
 
         return response(['status' => true, 'data' => $user]);

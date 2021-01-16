@@ -6,6 +6,7 @@ import Index from '../views/Index'
 import Login from '../views/Login'
 import Register from '../views/Register'
 import SelectCompany from '../views/SelectCompany'
+import Settings from '../views/Settings'
 
 Vue.use(VueRouter)
 
@@ -35,6 +36,14 @@ const routes = [
         path: '/select-company',
         name: 'SelectCompany',
         component: SelectCompany,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/settings',
+        name: 'Settings',
+        component: Settings,
         meta: {
             requiresAuth: true
         }

@@ -20,6 +20,8 @@ Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
 Route::post('/auth/get-user', 'App\Http\Controllers\AuthController@getUser');
 
 Route::post('/user/select-company', 'App\Http\Controllers\UserController@selectCompany');
+Route::post('/user/change-pilot-name', 'App\Http\Controllers\UserController@changePilotName');
+Route::post('/user/change-password', 'App\Http\Controllers\UserController@changePassword');
 
 Route::get('/{any}', function () {
     return view('index');
